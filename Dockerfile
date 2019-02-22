@@ -21,6 +21,12 @@ RUN \
 	php7-simplexml \
 	php7-xml \
 	php7-xmlwriter \
+	'su-exec>=0.2' \
+	tzdata \
+	bash \
+	curl \
+	openjdk8 \
+	openssl \
 	php7-zlib && \
  echo "**** configure nginx ****" && \
  echo 'fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;' >> \
@@ -39,12 +45,6 @@ VOLUME /config
 ##redis 5.0.3
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN addgroup -S redis && adduser -S -G redis redis
-
-RUN apk add --no-cache \
-# grab su-exec for easy step-down from root
-		'su-exec>=0.2' \
-# add tzdata for https://github.com/docker-library/redis/issues/138
-		tzdata
 
 ENV REDIS_VERSION 5.0.3
 ENV REDIS_DOWNLOAD_URL http://download.redis.io/releases/redis-5.0.3.tar.gz
@@ -105,19 +105,12 @@ CMD ["redis-server"]
 
 ##Install req's for elasticsearch
 
-RUN apk update && \
-    apk upgrade && \
-    apk add bash curl openjdk8 openssl && \
-    rm -rf /var/cache/apk/*
+RUN rm -rf /var/cache/apk/*
 
 # Install elasticsearch user
 RUN adduser -D -u 1000 -h /usr/share/elasticsearch elasticsearch
 
 RUN addgroup -S elasticsearch && adduser -S -G elasticsearch elasticsearch
-
-# grab su-exec for easy step-down from root
-# and bash for "bin/elasticsearch" among others
-RUN apk add --no-cache 'su-exec>=0.2' bash
 
 # https://artifacts.elastic.co/GPG-KEY-elasticsearch
 ENV GPG_KEY 46095ACC8548582C1A2699A9D27D666CD88E42B4
